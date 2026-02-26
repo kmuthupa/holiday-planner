@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 Travel Planner</title>
+    <title>Holiday Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -36,12 +36,15 @@
     <div class="w-full max-w-4xl bg-[#f8fafa] rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
-            <h1 class="text-2xl sm:text-3xl font-bold text-[#00424a] mb-4 sm:mb-0 text-center">2026 Travel Planner</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-[#00424a] mb-4 sm:mb-0 text-center">Holiday Planner</h1>
             <div class="flex items-center space-x-2">
                 <button id="prev-month" class="p-2 rounded-full bg-[#dbf6fa] hover:bg-[#bac6ea] text-[#00424a] transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h2 id="month-year" class="text-xl sm:text-2xl font-semibold text-[#273f43] w-48 text-center">January 2026</h2>
+                <div id="month-year-btn" class="flex items-center justify-center w-48 gap-1 select-none">
+                    <h2 id="month-year" class="text-xl sm:text-2xl font-semibold text-[#273f43] text-center">January 2026</h2>
+                    <span id="today-icon" class="text-[#00424a] text-lg opacity-0 transition-opacity duration-150">↺</span>
+                </div>
                 <button id="next-month" class="p-2 rounded-full bg-[#dbf6fa] hover:bg-[#bac6ea] text-[#00424a] transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                 </button>
@@ -94,6 +97,24 @@
             const prevMonthBtn = document.getElementById('prev-month');
             const nextMonthBtn = document.getElementById('next-month');
             const tooltipEl = document.getElementById('tooltip');
+            const monthYearBtnEl = document.getElementById('month-year-btn');
+            const todayIconEl = document.getElementById('today-icon');
+
+            monthYearBtnEl.addEventListener('click', () => {
+                const now = new Date();
+                if (currentDate.getFullYear() === now.getFullYear() && currentDate.getMonth() === now.getMonth()) return;
+                currentDate = new Date();
+                renderCalendar();
+            });
+            monthYearBtnEl.addEventListener('mouseenter', () => {
+                const now = new Date();
+                if (currentDate.getFullYear() !== now.getFullYear() || currentDate.getMonth() !== now.getMonth()) {
+                    todayIconEl.style.opacity = '1';
+                }
+            });
+            monthYearBtnEl.addEventListener('mouseleave', () => {
+                todayIconEl.style.opacity = '0';
+            });
 
             let currentDate = new Date();
 
@@ -261,6 +282,11 @@
                 nextMonthBtn.classList.toggle('opacity-50', month === 11);
                 prevMonthBtn.classList.toggle('cursor-not-allowed', month === 0);
                 nextMonthBtn.classList.toggle('cursor-not-allowed', month === 11);
+
+                const now = new Date();
+                const isCurrentMonth = currentDate.getFullYear() === now.getFullYear() && currentDate.getMonth() === now.getMonth();
+                monthYearBtnEl.style.cursor = isCurrentMonth ? 'default' : 'pointer';
+                if (isCurrentMonth) todayIconEl.style.opacity = '0';
             }
 
             prevMonthBtn.addEventListener('click', () => {
