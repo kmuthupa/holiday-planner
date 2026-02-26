@@ -217,8 +217,7 @@
                 const legendEl = document.getElementById('legend-items');
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
-                const monthStart = new Date(year, month, 1);
-                const monthEnd = new Date(year, month + 1, 0);
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
 
                 const colorDotMap = {
                     schoolBreak: '#facc15',
@@ -226,19 +225,19 @@
                     publicHoliday: '#de3730'
                 };
 
+                // Walk through each day and collect entries from finalDateStyles —
+                // the same data source the calendar uses, so colors always match.
                 const seen = new Set();
-                const monthEvents = events
-                    .filter(e => {
-                        const start = new Date(e.start + 'T12:00:00Z');
-                        const end = new Date(e.end + 'T12:00:00Z');
-                        return start <= monthEnd && end >= monthStart;
-                    })
-                    .filter(e => {
-                        if (seen.has(e.name)) return false;
-                        seen.add(e.name);
-                        return true;
-                    })
-                    .sort((a, b) => a.start.localeCompare(b.start));
+                const monthEvents = [];
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const event = finalDateStyles[dateStr];
+                    if (!event) continue;
+                    const displayName = event.name.replace(/^(Public Holiday|Long Weekend|School Break):\s*/, '');
+                    if (seen.has(displayName)) continue;
+                    seen.add(displayName);
+                    monthEvents.push({ displayName, type: event.type });
+                }
 
                 if (monthEvents.length === 0) {
                     legendEl.innerHTML = '<span class="text-sm text-[#273f43]">No events this month</span>';
@@ -246,11 +245,10 @@
                 }
 
                 legendEl.innerHTML = monthEvents.map(e => {
-                    const displayName = e.name.replace(/^(Public Holiday|Long Weekend|School Break):\s*/, '');
                     const color = colorDotMap[e.type];
                     return `<div class="flex items-center space-x-2">
                         <div class="w-4 h-4 rounded-full flex-shrink-0" style="background-color:${color}"></div>
-                        <span class="text-sm text-[#273f43]">${displayName}</span>
+                        <span class="text-sm text-[#273f43]">${e.displayName}</span>
                     </div>`;
                 }).join('');
             }
